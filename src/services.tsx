@@ -1,21 +1,21 @@
-const userData = [
-  {
-    fname: 'Golu',
-    lname: 'Gupta',
-    email: 'gg@gg.com',
-    password: 'gg'
-  },
-  {
-    fname: 'Manu',
-    lname: 'Singh',
-    email: 'ms@ms.com',
-    password: 'ms'
-  }
-];
+export const fetchUser = async (credentials: any): Promise<Record<string, any>> => {
+  const response = await fetch('http://localhost:8080/user', {
+    method: 'POST',
+    body: JSON.stringify(credentials),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.json();
+};
 
-export const fetchUser = (credentials: any) => {
-  const [user] = userData.filter(
-    (user) => credentials.email == user.email && credentials.password === user.password
-  );
-  return user;
+export const createUser = async (user: any): Promise<Record<string, any>> => {
+  const response = await fetch('http://localhost:8080/user/register', {
+    method: 'POST',
+    body: JSON.stringify(user),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.json();
 };

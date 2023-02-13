@@ -7,10 +7,13 @@ import { useRecoilState } from 'recoil';
 import { userState } from '../..';
 import { fetchUser } from '../../services';
 
-const onFinish = (values: any, setUser: any) => {
+const onFinish = async (values: any, setUser: any) => {
   console.log('Success:', values);
-  const user = fetchUser(values);
-  user && setUser(user);
+  const user = await fetchUser(values);
+  if (user.error) {
+    return alert('WRONG PASSWORD');
+  }
+  user && setUser({ ...user, isAuthenticated: true });
 };
 
 const onFinishFailed = (errorInfo: any) => {
@@ -22,7 +25,7 @@ const Login: React.FC = () => {
 
   return (
     <>
-      {user && <Navigate to="/dashboard" replace={true} />}
+      {user?.isAuthenticated && <Navigate to="/" replace={true} />}
       <div className="form-container">
         <BrandText />
         <Form

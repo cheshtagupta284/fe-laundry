@@ -1,13 +1,22 @@
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { userState } from '.';
+import ProtectedRoute from './Components/ProtectedRoute/ProtectedRoute';
 
 const Dashboard: React.FC = () => {
-  const user = useRecoilValue(userState);
+  const [user, setUser] = useRecoilState(userState);
 
   return (
-    <div className="Dashboard">
-      {user?.fname} {user?.lname}
-    </div>
+    <ProtectedRoute>
+      <div className="Dashboard">
+        {user?.fname} {user?.lname}
+        <button
+          onClick={() => {
+            setUser(null);
+          }}>
+          Sign Out
+        </button>
+      </div>
+    </ProtectedRoute>
   );
 };
 

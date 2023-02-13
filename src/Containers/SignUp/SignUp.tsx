@@ -1,9 +1,10 @@
 import React from 'react';
-import { Button, Form, Input, InputNumber } from 'antd';
+import { Button, Form, Input } from 'antd';
 import BrandText from '../Brand/BrandText';
 import { useRecoilState } from 'recoil';
 import { userState } from '../..';
 import { Navigate } from 'react-router-dom';
+import { createUser } from '../../services';
 
 const layout = {
   labelCol: { span: 8 },
@@ -23,9 +24,13 @@ const validateMessages = {
 };
 /* eslint-enable no-template-curly-in-string */
 
-const onFinish = (values: any, setUser: any) => {
-  console.log(values);
-  setUser(values.user);
+const onFinish = async (values: any, setUser: any) => {
+  const user = await createUser(values.user);
+  user.isAuthenticated = true;
+  if (user.error) {
+    return alert('USER ALREADY EXISTS');
+  }
+  values.user && setUser({ ...values.user, isAuthenticated: true });
 };
 
 const SignUp: React.FC = () => {
@@ -33,7 +38,7 @@ const SignUp: React.FC = () => {
 
   return (
     <div className="form-container">
-      {user && <Navigate to="/dashboard" replace={true} />}
+      {user?.isAuthenticated && <Navigate to="/" replace={true} />}
       <BrandText />
       <Form
         {...layout}

@@ -1,26 +1,35 @@
-import React, { useState } from "react";
-import { Button, Checkbox, Form, Input } from "antd";
-import { Navigate } from "react-router-dom";
-import "./index.css";
+import React, { useState } from 'react';
+import { Button, Checkbox, Form, Input } from 'antd';
+import { Link, Navigate } from 'react-router-dom';
+import './index.css';
+import BrandText from '../Brand/BrandText';
+import { useRecoilState } from 'recoil';
+import { userState } from '../..';
+import { fetchUser } from '../../services';
 
-const onFinish = (values: any, setUser: any) => {
-  console.log("Success:", values);
-  setUser(values);
+const onFinish = async (values: any, setUser: any) => {
+  console.log('Success:', values);
+  const user = await fetchUser(values);
+  if (user.error) {
+    return alert('WRONG PASSWORD');
+  }
+  user && setUser({ ...user, isAuthenticated: true });
 };
 
 const onFinishFailed = (errorInfo: any) => {
-  console.log("Failed:", errorInfo);
+  console.log('Failed:', errorInfo);
 };
 
 const Login: React.FC = () => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useRecoilState(userState);
 
   return (
     <>
-      {user && <Navigate to="/dashboard" replace={true} />}
+      {user?.isAuthenticated && <Navigate to="/" replace={true} />}
       <div className="form-container">
+        <BrandText />
         <Form
-          className="login-form"
+          className="login-signup-form"
           name="basic"
           labelCol={{ span: 8 }}
           wrapperCol={{ span: 16 }}
@@ -28,29 +37,22 @@ const Login: React.FC = () => {
           initialValues={{ remember: true }}
           onFinish={(values) => onFinish(values, setUser)}
           onFinishFailed={onFinishFailed}
-          autoComplete="off"
-        >
+          autoComplete="off">
           <Form.Item
-            label="Username"
-            name="username"
-            rules={[{ required: true, message: "Please input your username!" }]}
-          >
+            label="Email"
+            name="email"
+            rules={[{ required: true, message: 'Please input your email!' }]}>
             <Input />
           </Form.Item>
 
           <Form.Item
             label="Password"
             name="password"
-            rules={[{ required: true, message: "Please input your password!" }]}
-          >
+            rules={[{ required: true, message: 'Please input your password!' }]}>
             <Input.Password />
           </Form.Item>
 
-          <Form.Item
-            name="remember"
-            valuePropName="checked"
-            wrapperCol={{ offset: 8, span: 16 }}
-          >
+          <Form.Item name="remember" valuePropName="checked" wrapperCol={{ offset: 8, span: 16 }}>
             <Checkbox>Remember me</Checkbox>
           </Form.Item>
 
@@ -60,6 +62,9 @@ const Login: React.FC = () => {
             </Button>
           </Form.Item>
         </Form>
+        <p>
+          New Here? <Link to="/signup">Sign Up</Link> today
+        </p>
       </div>
     </>
   );

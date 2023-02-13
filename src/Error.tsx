@@ -1,20 +1,10 @@
-import { useRouteError } from 'react-router-dom';
-
-interface IError {
-  statusText: string;
-  message: string;
-}
-
-export default function Error() {
-  const error = useRouteError() as IError;
+export default function Error({ status }: { status?: number }) {
+  const message = status == 404 ? 'Not Found' : 'Sorry, an unexpected error has occurred.';
 
   return (
     <div id="error-page">
       <h1>Oops!</h1>
-      <p>Sorry, an unexpected error has occurred.</p>
-      <p>
-        <i>{error.statusText || error.message}</i>
-      </p>
+      <p>{message}</p>
     </div>
   );
 }

@@ -45,3 +45,13 @@ export const getClothByUser = async (): Promise<Record<string, any>> => {
 
   return response.json();
 };
+
+export const getLaundryByUser = async (): Promise<Record<string, any>> => {
+  const response = await fetch('http://localhost:8080/laundry', {
+    headers: {
+      User: 'test@test.com'
+    }
+  });
+
+  return response.json();
+};

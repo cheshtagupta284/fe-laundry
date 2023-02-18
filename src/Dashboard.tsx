@@ -1,11 +1,17 @@
-import { LikeOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons';
+import {
+  LikeOutlined,
+  MessageOutlined,
+  StarOutlined,
+  DownCircleFilled,
+  UpCircleFilled
+} from '@ant-design/icons';
 import { Avatar, Button, Form, Input, List, Space } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import { userState } from '.';
 import './index.css';
 import ProtectedRoute from './Components/ProtectedRoute/ProtectedRoute';
-import { createCloth, getClothByUser } from './services';
+import { createCloth, getClothByUser, getLaundryByUser } from './services';
 
 const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
   <Space>
@@ -17,12 +23,18 @@ const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
 const Dashboard: React.FC = () => {
   const [user, setUser] = useRecoilState(userState);
   const [clothList, setClothList] = useState<Record<string, any>[]>([]);
+  const [laundryList, setLaundryList] = useState<Record<string, any>[]>([]);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   useEffect(() => {
     getClothByUser().then((clothes) => setClothList(clothes as Record<string, any>[]));
+    getLaundryByUser().then((laundry) => {
+      laundry.sort((a: any, b: any) => -a.id + b.id);
+      setLaundryList(laundry as Record<string, any>[]);
+    });
   }, []);
 
-  const onFinish = async (event: any) => {
+  const onCreateCloth = async (event: any) => {
     const cloth = await createCloth({
       image: event.target[0].files[0],
       type: event.target[1].value
@@ -46,7 +58,7 @@ const Dashboard: React.FC = () => {
           </button>
         </div>
 
-        <Form name="cloth" onSubmitCapture={(event) => onFinish(event)} title="Add Cloth">
+        <Form name="cloth" onSubmitCapture={(event) => onCreateCloth(event)} title="Add Cloth">
           <Form.Item
             label="Upload"
             name="image"
@@ -87,6 +99,53 @@ const Dashboard: React.FC = () => {
                 />
               }>
               <List.Item.Meta title={item.type} />
+            </List.Item>
+          )}
+        />
+
+        {openIndex}
+        <List
+          header="Laundry List"
+          dataSource={laundryList}
+          itemLayout="vertical"
+          renderItem={(item) => (
+            <List.Item
+              key={item.id}
+              onClick={(e) => {
+                setOpenIndex((prevState) => (prevState === item.id ? null : item.id));
+              }}>
+              <div style={{ display: 'flex' }}>
+                <List.Item.Meta title={item.title} />
+                <IconText
+                  icon={item.id === openIndex ? UpCircleFilled : DownCircleFilled}
+                  text={item.clothList.length}
+                  key="list-dropdown"
+                />
+              </div>
+              <List
+                className={openIndex === item.id ? '' : 'hidden'}
+                header="Clothes List"
+                itemLayout="vertical"
+                dataSource={item.clothList}
+                renderItem={(clothItem: any) => (
+                  <List.Item
+                    key={clothItem.id}
+                    actions={[
+                      <IconText icon={StarOutlined} text="156" key="list-vertical-star-o" />,
+                      <IconText icon={LikeOutlined} text="156" key="list-vertical-like-o" />,
+                      <IconText icon={MessageOutlined} text="2" key="list-vertical-message" />
+                    ]}
+                    extra={
+                      <img
+                        alt="logo"
+                        src={`http://localhost:8080/cloth/image/${clothItem.image}`}
+                        style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                      />
+                    }>
+                    <List.Item.Meta title={clothItem.type} />
+                  </List.Item>
+                )}
+              />
             </List.Item>
           )}
         />

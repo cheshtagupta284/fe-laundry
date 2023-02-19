@@ -15,6 +15,7 @@ const Dashboard: React.FC = () => {
   const [laundryList, setLaundryList] = useState<Record<string, any>[]>([]);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [checkedList, setCheckedList] = useState<any>([]);
+  const [imageData, setImageData] = useState<any>(null);
   const {
     token: { colorBgContainer }
   } = theme.useToken();
@@ -33,7 +34,7 @@ const Dashboard: React.FC = () => {
   const onCreateCloth = async (event: any, setClothList: any) => {
     const cloth = await createCloth(
       {
-        image: event.target[0].files[0],
+        image: imageData,
         type: event.target[1].value
       },
       user?.email || ''
@@ -103,6 +104,12 @@ const Dashboard: React.FC = () => {
                   {user?.fname} {user?.lname}
                 </span>
               </div>
+              <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+                <img
+                  src={imageData && URL.createObjectURL(imageData)}
+                  style={{ width: 150, height: 150, background: '#333', objectFit: 'cover' }}
+                />
+              </div>
               <Form
                 name="cloth"
                 onSubmitCapture={(event) => onCreateCloth(event, setClothList)}
@@ -111,7 +118,30 @@ const Dashboard: React.FC = () => {
                   label="Upload"
                   name="image"
                   rules={[{ required: true, message: 'Please upload an image' }]}>
-                  <Input type="file" placeholder="Add Image" />
+                  <Input
+                    type="file"
+                    onChange={(e: any) => {
+                      const file = e.target.files[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = (e: any) => {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.onload = () => {
+                          const canvas = document.createElement('canvas');
+                          const ctx = canvas.getContext('2d');
+                          canvas.width = canvas.height = 300;
+                          ctx?.drawImage(img, 0, 0, 300, 300);
+                          canvas.toBlob(async (e) => {
+                            const buffer = new Uint8Array((await e?.arrayBuffer()) || []);
+                            return setImageData(new Blob([buffer], { type: 'image/jpg' }));
+                          }, file.type);
+                        };
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                    placeholder="Add Image"
+                  />
                 </Form.Item>
                 <Form.Item
                   label="Type"

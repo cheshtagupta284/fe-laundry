@@ -11,3 +11,23 @@ h4.ant-list-item-meta-title {
 .hidden {
   display: none;
 }
+
+.ant-checkbox-wrapper.ant-checkbox-wrapper-in-form-item.ant-checkbox-group-item {
+  border: none;
+  margin: 0;
+}
+
+.laundry-cloth-list {
+  max-height: 200px;
+  overflow: scroll;
+}
+
+.layout .brand-text {
+  color: white;
+}
+
+.layout header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

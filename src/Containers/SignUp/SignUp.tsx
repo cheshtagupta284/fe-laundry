@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Form, Input } from 'antd';
-import BrandText from '../Brand/BrandText';
+import BrandText from '../../Components/Brand/BrandText';
 import { useRecoilState } from 'recoil';
 import { userState } from '../..';
 import { Navigate } from 'react-router-dom';

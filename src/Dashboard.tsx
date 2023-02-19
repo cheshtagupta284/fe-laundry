@@ -1,95 +1,214 @@
-import { LikeOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons';
-import { Avatar, Button, Form, Input, List, Space } from 'antd';
+import { DownCircleFilled, UpCircleFilled } from '@ant-design/icons';
+import { Button, Checkbox, Form, Input, Layout, List, Menu, Space, theme } from 'antd';
+import { Content, Footer, Header } from 'antd/es/layout/layout';
 import React, { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import { userState } from '.';
-import './index.css';
+import BrandText from './Components/Brand/BrandText';
 import ProtectedRoute from './Components/ProtectedRoute/ProtectedRoute';
-import { createCloth, getClothByUser } from './services';
-
-const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
-  <Space>
-    {React.createElement(icon)}
-    {text}
-  </Space>
-);
+import './index.css';
+import { createCloth, createLaundry, getClothByUser, getLaundryByUser } from './services';
 
 const Dashboard: React.FC = () => {
   const [user, setUser] = useRecoilState(userState);
   const [clothList, setClothList] = useState<Record<string, any>[]>([]);
+  const [laundryList, setLaundryList] = useState<Record<string, any>[]>([]);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [checkedList, setCheckedList] = useState<any>([]);
+  const {
+    token: { colorBgContainer }
+  } = theme.useToken();
 
-  useEffect(() => {
-    getClothByUser().then((clothes) => setClothList(clothes as Record<string, any>[]));
-  }, []);
+  const [selectedKeys, setSelectedKeys] = useState(['1']);
 
-  const onFinish = async (event: any) => {
-    const cloth = await createCloth({
-      image: event.target[0].files[0],
-      type: event.target[1].value
-    });
-    setClothList((prevState) => [...prevState, cloth]);
+  const CheckboxGroup = Checkbox.Group;
+
+  const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
+    <Space>
+      {React.createElement(icon)}
+      {text}
+    </Space>
+  );
+
+  const onCreateCloth = async (event: any, setClothList: any) => {
+    const cloth = await createCloth(
+      {
+        image: event.target[0].files[0],
+        type: event.target[1].value
+      },
+      user?.email || ''
+    );
+    setClothList((prevState: any) => [...prevState, cloth]);
     console.log(cloth);
   };
+
+  const onCreateLaundry = async (values: any, setLaundryList: any) => {
+    values = {
+      title: values.title,
+      clothList: values.clothList.map((item: number) => ({
+        id: item
+      }))
+    };
+    console.log(values);
+    await createLaundry(values, user?.email || '');
+    getLaundryByUser(user?.email || '').then((laundry) => {
+      laundry.sort((a: any, b: any) => -a.id + b.id);
+      setLaundryList(laundry as Record<string, any>[]);
+    });
+  };
+
+  const onChange = (list: any, setCheckedList: any) => {
+    setCheckedList(list);
+  };
+
+  useEffect(() => {
+    console.log('RENDERED');
+    getClothByUser(user?.email || '').then((clothes) =>
+      setClothList(clothes as Record<string, any>[])
+    );
+    getLaundryByUser(user?.email || '').then((laundry) => {
+      laundry.sort((a: any, b: any) => -a.id + b.id);
+      setLaundryList(laundry as Record<string, any>[]);
+    });
+  }, []);
 
   return (
     <ProtectedRoute>
       <>
-        <div
-          className="Dashboard"
-          style={{ display: 'flex', justifyContent: 'space-between', padding: '2em 0' }}>
-          {user?.fname} {user?.lname}
-          <button
-            onClick={() => {
-              setUser(null);
-            }}>
-            Sign Out
-          </button>
-        </div>
+        <Layout className="layout">
+          <Header>
+            <BrandText />
+            <Menu
+              theme="dark"
+              mode="horizontal"
+              defaultSelectedKeys={['1']}
+              selectedKeys={selectedKeys}
+              items={new Array(3).fill(null).map((_, index) => {
+                const key = index + 1;
+                return {
+                  key,
+                  label: ['Home', 'Add Laundry', 'All Laundry'][index],
+                  onClick: () => {
+                    setSelectedKeys([`${key}`]);
+                  }
+                };
+              })}
+            />
+          </Header>
+          <Content style={{ padding: '2rem 1rem' }}>
+            <div className={`site-layout-content ${selectedKeys.includes('1') ? '' : 'hidden'}`}>
+              <div style={{ marginBottom: '1rem' }}>
+                Hello{' '}
+                <span style={{ cursor: 'pointer' }} onClick={() => setUser(null)}>
+                  {user?.fname} {user?.lname}
+                </span>
+              </div>
+              <Form
+                name="cloth"
+                onSubmitCapture={(event) => onCreateCloth(event, setClothList)}
+                title="Add Cloth">
+                <Form.Item
+                  label="Upload"
+                  name="image"
+                  rules={[{ required: true, message: 'Please upload an image' }]}>
+                  <Input type="file" placeholder="Add Image" />
+                </Form.Item>
+                <Form.Item
+                  label="Type"
+                  name="type"
+                  rules={[{ required: true, message: 'Please input the type' }]}>
+                  <Input placeholder="Shirt / Pant / Towel" />
+                </Form.Item>
 
-        <Form name="cloth" onSubmitCapture={(event) => onFinish(event)} title="Add Cloth">
-          <Form.Item
-            label="Upload"
-            name="image"
-            rules={[{ required: true, message: 'Please upload an image' }]}>
-            <Input type="file" placeholder="Add Image" />
-          </Form.Item>
-          <Form.Item
-            label="Type"
-            name="type"
-            rules={[{ required: true, message: 'Please input the type' }]}>
-            <Input placeholder="Shirt / Pant / Towel" />
-          </Form.Item>
-
-          <Form.Item wrapperCol={{ span: 12, offset: 6 }}>
-            <Button type="primary" htmlType="submit">
-              Submit
-            </Button>
-          </Form.Item>
-        </Form>
-
-        <List
-          header="Clothes List"
-          itemLayout="vertical"
-          dataSource={clothList}
-          renderItem={(item) => (
-            <List.Item
-              key={item.id}
-              actions={[
-                <IconText icon={StarOutlined} text="156" key="list-vertical-star-o" />,
-                <IconText icon={LikeOutlined} text="156" key="list-vertical-like-o" />,
-                <IconText icon={MessageOutlined} text="2" key="list-vertical-message" />
-              ]}
-              extra={
-                <img
-                  alt="logo"
-                  src={`http://localhost:8080/cloth/image/${item.image}`}
-                  style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-                />
-              }>
-              <List.Item.Meta title={item.type} />
-            </List.Item>
-          )}
-        />
+                <Form.Item wrapperCol={{ span: 12, offset: 6 }}>
+                  <Button type="primary" htmlType="submit">
+                    Add Cloth
+                  </Button>
+                </Form.Item>
+              </Form>
+            </div>
+            <div className={`site-layout-content ${selectedKeys.includes('2') ? '' : 'hidden'}`}>
+              <Form
+                name="laundry"
+                title="Add Laundry"
+                initialValues={{
+                  ['title']: new Date().toJSON().slice(0, 10).replaceAll('-', '/'),
+                  ['clothes']: []
+                }}
+                onFinish={(values) => onCreateLaundry(values, setLaundryList)}>
+                <Form.Item label="Title" name="title">
+                  <Input
+                    placeholder={new Date().toJSON().slice(0, 10).replaceAll('-', '/')}
+                    value={new Date().toJSON().slice(0, 10).replaceAll('-', '/')}
+                  />
+                </Form.Item>
+                <Form.Item label="Clothes" name="clothList" valuePropName="values">
+                  <CheckboxGroup
+                    style={{
+                      flexWrap: 'wrap',
+                      maxHeight: '274px',
+                      overflow: 'scroll'
+                    }}
+                    options={clothList.map((item) => {
+                      return {
+                        label: (
+                          <img
+                            alt="logo"
+                            src={`https://laundry.tanq.tk:5000/cloth/image/${item.image}`}
+                            style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+                          />
+                        ),
+                        value: item.id
+                      };
+                    })}
+                    value={checkedList}
+                    onChange={(values) => onChange(values, setCheckedList)}
+                  />
+                </Form.Item>
+                <Form.Item wrapperCol={{ span: 12, offset: 6 }}>
+                  <Button type="primary" htmlType="submit">
+                    Submit
+                  </Button>
+                </Form.Item>
+              </Form>
+            </div>
+            <div className={`site-layout-content ${selectedKeys.includes('3') ? '' : 'hidden'}`}>
+              <List
+                dataSource={laundryList}
+                itemLayout="vertical"
+                renderItem={(item) => (
+                  <List.Item
+                    key={item.id}
+                    onClick={(e) => {
+                      setOpenIndex((prevState) => (prevState === item.id ? null : item.id));
+                    }}>
+                    <div style={{ display: 'flex' }}>
+                      <List.Item.Meta title={item.title} />
+                      <IconText
+                        icon={item.id === openIndex ? UpCircleFilled : DownCircleFilled}
+                        text={item.clothList.length}
+                        key="list-dropdown"
+                      />
+                    </div>
+                    <div className={`laundry-cloth-grid ${openIndex === item.id ? '' : 'hidden'}`}>
+                      {item.clothList.map((clothItem: any) => (
+                        <img
+                          key={clothItem.id}
+                          alt="logo"
+                          src={`https://laundry.tanq.tk:5000/cloth/image/${clothItem.image}`}
+                          style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                        />
+                      ))}
+                    </div>
+                  </List.Item>
+                )}
+              />
+            </div>
+          </Content>
+          <Footer style={{ textAlign: 'center', borderTop: '1px solid #dfdfdf' }}>
+            Made by Cheshta
+          </Footer>
+        </Layout>
       </>
     </ProtectedRoute>
   );

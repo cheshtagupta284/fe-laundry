@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, Checkbox, Form, Input } from 'antd';
 import { Link, Navigate } from 'react-router-dom';
 import './index.css';
-import BrandText from '../Brand/BrandText';
+import BrandText from '../../Components/Brand/BrandText';
 import { useRecoilState } from 'recoil';
 import { userState } from '../..';
 import { fetchUser } from '../../services';

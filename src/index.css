@@ -4,8 +4,23 @@ body {
     'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
 }
 
+.layout {
+  min-height: 100vh;
+  overflow: hidden;
+}
+
 h4.ant-list-item-meta-title {
   margin: 0 !important;
+}
+
+.logo {
+  float: left;
+  margin-right: 24px;
+  color: white;
+}
+.ant-row-rtl .logo {
+  float: right;
+  margin-left: 24px;
 }
 
 .hidden {
@@ -17,17 +32,25 @@ h4.ant-list-item-meta-title {
   margin: 0;
 }
 
-.laundry-cloth-list {
-  max-height: 200px;
-  overflow: scroll;
+.ant-checkbox-wrapper.ant-checkbox-wrapper-in-form-item.ant-checkbox-group-item .cloth-image {
+  width: 90px;
+  height: 90px;
 }
 
-.layout .brand-text {
-  color: white;
+.ant-card-body {
+  padding: 11px !important; 
 }
 
-.layout header {
+.cloth-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 30px;
+  object-fit: cover;
+  margin: 5px;
+}
+
+.cloth-image-list {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
 }

@@ -7,7 +7,6 @@ export const fetchUser = async (credentials: any): Promise<Record<string, any>> 
     }
   });
 
-  alert('Authenticated');
   return response.json();
 };
 
@@ -20,8 +19,20 @@ export const createUser = async (user: any): Promise<Record<string, any>> => {
     }
   });
 
-  alert('Authenticated');
   return response.json();
+};
+
+export const deleteLaundry = async (id: number, email: string): Promise<Record<string, any>> => {
+  const response = await fetch('https://laundry.tanq.tk:5000/laundry', {
+    method: 'DELETE',
+    body: JSON.stringify({ id }),
+    headers: {
+      'Content-Type': 'application/json',
+      User: email
+    }
+  });
+
+  return response;
 };
 
 export const createCloth = async (cloth: any, email: string): Promise<Record<string, any>> => {
@@ -37,7 +48,6 @@ export const createCloth = async (cloth: any, email: string): Promise<Record<str
     }
   });
 
-  alert('Cloth Processed');
   return response.json();
 };
 
@@ -71,6 +81,5 @@ export const createLaundry = async (laundry: any, email: string): Promise<Record
     }
   });
 
-  alert('Laundry Processed');
   return response.json();
 };

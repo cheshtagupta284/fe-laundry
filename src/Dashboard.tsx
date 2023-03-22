@@ -29,7 +29,8 @@ import {
   createLaundry,
   deleteLaundry,
   getClothByUser,
-  getLaundryByUser
+  getLaundryByUser,
+  SERVER
 } from './services';
 
 const CheckboxGroup = Checkbox.Group;
@@ -69,7 +70,7 @@ const Dashboard: React.FC = () => {
             <img
               key={item.id}
               alt="logo"
-              src={`https://laundry.tanq.tk:5000/cloth/image/${item.image}`}
+              src={`${SERVER}/cloth/image/${item.image}`}
               className="cloth-image"
             />
           );
@@ -193,7 +194,7 @@ const Dashboard: React.FC = () => {
                 <img
                   key={clothItem.id}
                   alt="logo"
-                  src={`https://laundry.tanq.tk:5000/cloth/image/${clothItem.image}`}
+                  src={`${SERVER}/cloth/image/${clothItem.image}`}
                   style={{ width: '100px', height: '100px', objectFit: 'cover' }}
                 />
               ))}
@@ -229,7 +230,7 @@ const Dashboard: React.FC = () => {
                 label: (
                   <img
                     alt="logo"
-                    src={`https://laundry.tanq.tk:5000/cloth/image/${item.image}`}
+                    src={`${SERVER}/cloth/image/${item.image}`}
                     className="cloth-image"
                   />
                 ),
